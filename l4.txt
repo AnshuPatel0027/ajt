@@ -1,0 +1,83 @@
+Index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lab 4</title>
+</head>
+<body>
+<h2>Lab 4 AJT</h2>
+<form action="Lab4" method="get">
+<input type="submit" value="Get Addition">
+</form>
+</body>
+</html>
+
+
+Lab4.java
+package com.java;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+public class Lab4 extends HttpServlet {
+private static final long serialVersionUID = 1L;
+private String servletName;
+public void init(ServletConfig config) throws ServletException {
+super.init(config);
+servletName = config.getServletName();
+}
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+ServletContext context = getServletContext();
+int contextParamValue = Integer.parseInt(context.getInitParameter("Num2"));
+int servletParamValue =
+Integer.parseInt(getServletConfig().getInitParameter("Num1"));
+int num1 = contextParamValue;
+int num2 = servletParamValue;
+int sum = num1 + num2;
+out.println("<html><body>");
+out.println("<h3>Servlet Context and Servlet Config Example with Addition</h3>");
+out.println("<p>Servlet Name: " + servletName + "</p>");
+out.println("<p>Context Parameter Value: " + contextParamValue + "</p>");
+out.println("<p>Servlet Parameter Value: " + servletParamValue + "</p>");
+out.println("<p>Sum of " + num1 + " and " + num2 + " is: " + sum + "</p>");
+out.println("</body></html>");
+out.close();
+}
+}
+
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="https://jakarta.ee/xml/ns/jakartaee"
+xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd" id="WebApp_ID" version="6.0">
+<display-name>ajtlab4</display-name>
+<servlet>
+<description></description>
+<display-name>Lab4</display-name>
+<servlet-name>Lab4</servlet-name>
+<servlet-class>com.java.Lab4</servlet-class>
+<init-param>
+<param-name>Num1</param-name>
+<param-value>10</param-value>
+</init-param>
+</servlet>
+<servlet-mapping>
+<servlet-name>Lab4</servlet-name>
+<url-pattern>/Lab4</url-pattern>
+</servlet-mapping>
+<context-param>
+<param-name>Num2</param-name>
+<param-value>20</param-value>
+</context-param>
+</web-app>

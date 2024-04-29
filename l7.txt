@@ -1,0 +1,79 @@
+Index.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lab 7</title>
+</head>
+<body>
+<h2>lab 7|IU182</h2>
+<form action="Lab7" method="Get">
+<input type="submit" value="SUBMIT">
+</form>
+</body>
+</html>
+Lab7.java
+package com.kru;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+public class Lab7 extends HttpServlet {
+private static final long serialVersionUID = 1L;
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
+ServletException, IOException {
+resp.setContentType("text/html");
+RequestDispatcher includeDispatcher = req.getRequestDispatcher("/TargetServlet");
+includeDispatcher.include(req, resp);
+RequestDispatcher forwardDispatcher = req.getRequestDispatcher("/TargetServlet");
+forwardDispatcher.forward(req, resp);
+}
+}
+TargetServlet.java
+package com.kru;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+public class TargetServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
+ServletException, IOException {
+resp.setContentType("text/html");
+PrintWriter out = resp.getWriter();
+out.println("<html><body>");
+out.println("<h1>This is the Target Servlet</h1>");
+out.println("</body></html>");
+}
+}
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+<display-name>lab7</display-name>
+<servlet>
+<display-name>Lab7</display-name>
+<servlet-name>Lab7</servlet-name>
+<servlet-class>com.kru.Lab7</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>Lab7</servlet-name>
+<url-pattern>/Lab7</url-pattern>
+</servlet-mapping>
+<servlet>
+<description></description>
+<display-name>TargetServlet</display-name>
+<servlet-name>TargetServlet</servlet-name>
+<servlet-class>com.kru.TargetServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>TargetServlet</servlet-name>
+<url-pattern>/TargetServlet</url-pattern>
+</servlet-mapping>
+</web-app>

@@ -1,0 +1,123 @@
+Index.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lab2 CRUD</title>
+</head>
+<body>
+<h2>Lab2 CRUD Operations</h2>
+<form action="Lab2" method="post">
+<input type="hidden" name="action" value="create">
+Name: <input type="text" name="name"><br>
+Age: <input type="number" name="age"><br>
+<input type="submit" value="Create">
+</form>
+<br>
+<form action="Lab2" method="post">
+<input type="hidden" name="action" value="read">
+<input type="submit" value="Read">
+</form>
+<br>
+<form action="Lab2" method="post">
+<input type="hidden" name="action" value="update">
+ID of student to update: <input type="number" name="id"><br>
+New Name: <input type="text" name="name"><br>
+New Age: <input type="number" name="age"><br>
+<input type="submit" value="Update">
+</form>
+<br>
+<form action="Lab2" method="post">
+<input type="hidden" name="action" value="delete">
+ID of student to delete: <input type="number" name="id"><br>
+<input type="submit" value="Delete">
+</form>
+</body>
+</html>
+
+
+Lab2.java
+package com.java;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.*;
+public class Lab2 extends HttpServlet {
+private static final long serialVersionUID = 1L;
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+String action = request.getParameter("action");
+String url = "jdbc:mysql://localhost:3306/lab2db";
+String user = "root";
+String password = " ";
+try {
+Class.forName("com.mysql.cj.jdbc.Driver");
+Connection conn = DriverManager.getConnection(url, user, password);
+if (action.equals("create")) {
+String name = request.getParameter("name");
+int age = Integer.parseInt(request.getParameter("age"));
+// CallableStatement
+CallableStatement cstmt = conn.prepareCall("{CALL insert_record(?, ?)}");
+cstmt.setString(1, name);
+cstmt.setInt(2, age);
+cstmt.executeUpdate();
+out.println("Record inserted successfully!");
+} else if (action.equals("read")) {
+//Statement
+Statement stmt = conn.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT * FROM lab2table");
+out.println("<table border=1>");
+out.println("<tr><th>Name</th><th>Age</th></tr>");
+while (rs.next()) {
+out.println("<tr><td>" + rs.getString("name") + "</td><td>" + rs.getInt("age")
++ "</td></tr>");
+}
+out.println("</table>");
+} else if (action.equals("update")) {
+int id = Integer.parseInt(request.getParameter("id"));
+String name = request.getParameter("name");
+int age = Integer.parseInt(request.getParameter("age"));
+//Prepared Statement
+PreparedStatement pstmt = conn.prepareStatement("UPDATE lab2table SET
+name=?, age=? WHERE id=?");
+pstmt.setString(1, name);
+pstmt.setInt(2, age);
+pstmt.setInt(3, id);
+pstmt.executeUpdate();
+out.println("Record updated successfully!");
+}
+else if (action.equals("delete")) {
+int id = Integer.parseInt(request.getParameter("id"));
+PreparedStatement pstmt = conn.prepareStatement("DELETE FROM
+lab2table WHERE id=?");
+pstmt.setInt(1, id);
+pstmt.executeUpdate();
+out.println("Record deleted successfully!");
+}
+conn.close();
+} catch (Exception e) {
+out.println(e);
+}
+out.close();
+}
+}
+
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+<display-name>ajtLab2</display-name>
+<servlet>
+<servlet-name>Lab2</servlet-name>
+<servlet-class>com.java.Lab2</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>Lab2</servlet-name>
+<url-pattern>/Lab2</url-pattern>
+</servlet-mapping>
+</web-app>

@@ -1,0 +1,65 @@
+Index.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lab 1</title>
+</head>
+<body>
+<form action="Lab1" method="post">
+<input type="submit" value="submit">
+</form>
+</body>
+</html>
+
+
+Lab1.java
+package ajtLab1;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;public class Lab1 extends HttpServlet{
+private static final long serialVersionUID = 1L;
+public void doPost(HttpServletRequest req, HttpServletResponse res) throws
+IOException {
+Connection connection = null;
+PrintWriter out = res.getWriter();
+try {
+Class.forName("com.mysql.cj.jdbc.Driver");
+String url = "jdbc:mysql://localhost:3306/studentdb";
+String username = "root";
+String password = " ";
+connection = DriverManager.getConnection(url, username, password);
+out.println("Connected to the database!");
+}
+catch (ClassNotFoundException | SQLException e) {
+e.printStackTrace();
+out.println("Failed to connect to the database.");
+} finally {
+if (connection != null) {
+try {
+connection.close();
+} catch (SQLException e) {
+e.printStackTrace(); } } } } }
+
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+<display-name>ajtLab1</display-name>
+<servlet>
+<servlet-name>Lab1</servlet-name>
+<servlet-class>ajtLab1.Lab1</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>Lab1</servlet-name>
+<url-pattern>/Lab1</url-pattern>
+</servlet-mapping>
+</web-app>

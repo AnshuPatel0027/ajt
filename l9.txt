@@ -1,0 +1,126 @@
+Student.jsp :-
+<%@ page import="java.sql.*" %>
+<%@ page contentType="text/xml;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page trimDirectiveWhitespaces="true" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+Connection conn = null;
+try {
+Class.forName("com.mysql.cj.jdbc.Driver");
+conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/students", "root",
+"Krupal@123");
+} catch (Exception e) {
+e.printStackTrace();
+}
+List<Integer> studentIds = new ArrayList<>();
+List<String> studentNames = new ArrayList<>();
+try {
+Statement stmt = conn.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT id, name FROM students");
+while (rs.next()) {
+studentIds.add(rs.getInt("id"));
+studentNames.add(rs.getString("name"));
+}
+rs.close();
+stmt.close();
+} catch (Exception e) {
+e.printStackTrace();
+}
+List<String> subjectNames = new ArrayList<>();
+List<String> subjectGrades = new ArrayList<>();
+try {
+Statement stmt = conn.createStatement();
+ResultSet rs = stmt.executeQuery("SELECT subject_name, grade FROM subjects");
+while (rs.next()) {
+subjectNames.add(rs.getString("subject_name"));
+subjectGrades.add(rs.getString("grade"));
+}
+rs.close();
+stmt.close();
+} catch (Exception e) {
+e.printStackTrace();
+}
+conn.close();
+request.setAttribute("studentIds", studentIds);
+request.setAttribute("studentNames", studentNames);
+request.setAttribute("subjectNames", subjectNames);
+request.setAttribute("subjectGrades", subjectGrades);
+%>
+<?xml version="1.0" encoding="UTF-8"?>
+<students xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="students.xsd">
+<c:forEach var="i" begin="0" end="${studentIds.size() - 1}">
+<student>
+<id><c:out value="${studentIds[i]}" /></id>
+<name><c:out value="${studentNames[i]}" /></name>
+<subjects>
+<c:forEach var="subjectIndex" begin="0" end="${subjectNames.size() - 1}">
+<c:if test="${subjectIndex % studentIds.size() == i}">
+<subject>
+<name><c:out value="${subjectNames[subjectIndex]}" /></name>
+<grade><c:out value="${subjectGrades[subjectIndex]}" /></grade>
+</subject>
+</c:if>
+</c:forEach>
+</subjects>
+</student>
+</c:forEach>
+</students>
+Student.dtd
+<!ELEMENT students (student+)>
+<!ELEMENT student (id, name, age, subjects)>
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT age (#PCDATA)>
+<!ELEMENT subjects (subject+)>
+<!ELEMENT subject (name, grade)>
+<!ELEMENT subject_name (#PCDATA)>
+<!ELEMENT grade (#PCDATA)>
+Student.xsd
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="students">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="student" maxOccurs="unbounded">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="id" type="xs:int"/>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="subjects">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="subject" maxOccurs="unbounded">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="name" type="xs:string"/>
+<xs:element name="grade" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:schema>
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:jsp="http://java.sun.com/xml/ns/javaee/jsp"
+xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/webapp_5_0.xsd" id="WebApp_ID" version="5.0">
+<display-name>jstl prac</display-name>
+<jsp-config>
+<taglib>
+<taglib-uri>http://java.sun.com/jsp/jstl/core</taglib-uri>
+<taglib-location>/WEB-INF/tld/c.tld</taglib-location>
+</taglib>
+</jsp-config>
+</web-app>

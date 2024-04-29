@@ -1,0 +1,197 @@
+Books.java :
+package com.javatpoint.model;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+@Entity
+@Table
+public class Books
+{
+@Id
+@Column
+private int bookid;
+@Column
+private String bookname;
+@Column
+private String author;
+@Column
+private int price;
+public int getBookid()
+{
+return bookid;
+}
+public void setBookid(int bookid)
+{
+this.bookid = bookid; 
+}
+public String getBookname()
+{
+return bookname;
+}
+public void setBookname(String bookname)
+{
+this.bookname = bookname;
+}
+public String getAuthor()
+{
+return author;
+}
+public void setAuthor(String author)
+{
+this.author = author;
+}
+public int getPrice()
+{
+return price;
+}
+public void setPrice(int price)
+{
+this.price = price;
+}
+} 
+
+BooksController.java :
+package com.javatpoint.controller;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.javatpoint.model.Books;
+import com.javatpoint.service.BooksService;
+@RestController
+public class BooksController
+{
+@Autowired
+BooksService booksService;
+@GetMapping("/book")
+private List<Books> getAllBooks()
+{
+return booksService.getAllBooks();
+}
+@GetMapping("/book/{bookid}")
+private Books getBooks(@PathVariable("bookid") int bookid)
+{
+return booksService.getBooksById(bookid);
+}
+@DeleteMapping("/book/{bookid}")
+private void deleteBook(@PathVariable("bookid") int bookid)
+{
+booksService.delete(bookid);
+}
+@PostMapping("/books")
+private int saveBook(@RequestBody Books books)
+{
+booksService.saveOrUpdate(books);
+return books.getBookid();
+}
+@PutMapping("/books")
+private Books update(@RequestBody Books books)
+{
+booksService.saveOrUpdate(books);
+return books;
+}
+} 
+
+BooksService.java :
+package com.javatpoint.service;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.javatpoint.model.Books;
+import com.javatpoint.repository.BooksRepository;
+@Service
+public class BooksService
+{
+@Autowired
+BooksRepository booksRepository;
+public List<Books> getAllBooks()
+{
+List<Books> books = new ArrayList<Books>();
+booksRepository.findAll().forEach(books1 -> books.add(books1));
+return books;
+}
+public Books getBooksById(int id)
+{
+return booksRepository.findById(id).get();
+}
+public void saveOrUpdate(Books books)
+{
+booksRepository.save(books);
+}
+public void delete(int id)
+{
+booksRepository.deleteById(id);
+}
+public void update(Books books, int bookid)
+{
+booksRepository.save(books);
+}
+} 
+
+BooksRepository.java :
+package com.javatpoint.repository;
+import org.springframework.data.repository.CrudRepository;
+import com.javatpoint.model.Books;
+public interface BooksRepository extends CrudRepository<Books, Integer>
+{
+}
+application.properties :
+spring.datasource.url=jdbc:h2:mem:books_data
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.h2.console.enabled=true
+SpringBootCrudOperationApplication.java :
+package com.javatpoint;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+@SpringBootApplication
+public class SpringBootCrudOperationApplication
+{
+public static void main(String[] args)
+{
+SpringApplication.run(SpringBootCrudOperationApplication.class, args);
+}
+}
+
+JSON :
+{
+ "bookid": "5433",
+ "bookname": "Core and Advance Java",
+ "author": "R. Nageswara Rao",
+ "price": "800" 
+ }
+{
+ "bookid": "0982",
+ "bookname": "Programming with Java",
+ "author": "E. Balagurusamy",
+ "price": "350"
+}
+{
+ "bookid": "6321",
+ "bookname": "Data Structures and Algorithms in Java",
+ "author": "Robert Lafore",
+ "price": "590"
+}
+{
+ "bookid": "6830",
+ "bookname": "Yashavant Kanetkar",
+ "author": "Exploring C",
+ "price": "670"
+}
+
+UPDATE 6321 :
+{
+ "bookid": "6321",
+ "bookname": "Data Structures and Algorithms in Java",
+ "author": "Robert Lafore",
+ "price": "500"
+} 

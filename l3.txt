@@ -1,0 +1,89 @@
+Index.html
+<html>
+<head>
+<title>Practical 3</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<form action="StudentServlet">
+<input type="submit" name="Go to Table Data">
+</form>
+</body>
+</html>
+
+
+StudentServlet.java
+package com.java;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+@WebServlet("/StudentServlet")
+public class StudentServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+String url = "jdbc:derby://localhost:1527/StudentRegistration";
+String username = "admin1";
+String password = "admin1";
+try {
+Connection connection = DriverManager.getConnection(url, username,
+password);
+Statement statement = connection.createStatement();
+ResultSet result = statement.executeQuery("SELECT * FROM studentreg");
+ResultSetMetaData rsMeta = result.getMetaData();
+int numberOfColumns = rsMeta.getColumnCount();
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+out.println("<table border=1 width=50% height=50%>");
+out.println("<tr>");
+for (int i = 1; i <= numberOfColumns; i++) {
+out.println("<th>" + rsMeta.getColumnName(i) + "</th>");
+}
+out.println("</tr>");
+while (result.next()) {
+out.println("<tr>");
+for (int i = 1; i <= numberOfColumns; i++) {
+out.println("<td>" + result.getObject(i) + "</td>");
+}
+out.println("</tr>");
+}
+out.println("</table>");
+out.close();
+result.close();
+statement.close();
+connection.close();
+} catch (Exception e) {
+e.printStackTrace(); } } }
+
+
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<servlet>
+<servlet-name>StudentServlet</servlet-name>
+<servlet-class> com.java.StudentServlet </servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name> StudentServlet </servlet-name>
+<url-pattern>/StudentServlet </url-pattern>
+</servlet-mapping>
+<session-config>
+<session-timeout>
+30
+</session-timeout>
+</session-config>
+</web-app>

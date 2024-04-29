@@ -1,0 +1,122 @@
+SessionFactoryProvider.java :
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+public class SessionFactoryProvider {
+public static SessionFactory provideSessionFactory()
+{
+Configuration config=new Configuration();
+config.configure();
+return config.buildSessionFactory();
+}
+}
+
+Student.java :
+import javax.persistence.*;
+@Entity
+public class Student {
+@Id
+private int id;
+private String name;
+private int std;
+public Student() {
+}
+public Student(int id, String name, int std) {
+       this.id = id;
+this.name = name;
+this.std = std;
+}
+public int getId() {
+return id;
+}
+public void setId(int id) {
+this.id = id;
+}
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public int getStd() {
+return std;
+}
+public void setStd(int std) {
+this.std = std;
+}
+}
+hibernate.cfg.xml :
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+<session-factory>
+<property name="hibernate.hbm2ddl.auto">create</property>
+<property
+name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+<property name="hibernate.connection.password">root</property>
+<property
+name="hibernate.connection.url">jdbc:mysql://localhost:3306/student_info</property>
+<property name="hibernate.connection.username">root</property>
+<property
+name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
+<mapping class="beans.Student"></mapping>
+</session-factory>
+</hibernate-configuration>
+Create.java :
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import utilities.SessionFactoryProvider;
+public class Create {
+public static void main(String[] args)
+{
+SessionFactory
+sessionFactory=SessionFactoryProvider.provideSessionFactory(); 
+Session session=sessionFactory.openSession();
+Transaction t=session.beginTransaction();
+Student s=new Student(101,"John",10);
+session.save(s);
+t.commit();
+sessionFactory.close();
+}
+}
+Update.java :
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import utilities.SessionFactoryProvider;
+public class Update {
+public static void main(String[] args)
+{
+SessionFactory
+sessionFactory=SessionFactoryProvider.provideSessionFactory();
+Session session=sessionFactory.openSession();
+Transaction t=session.beginTransaction();
+Student s=session.get(Student.class, 101);
+s.setStd(11);
+session.save(s);
+t.commit();
+sessionFactory.close();
+} 
+}
+Delete.java :
+package crudOperations;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import beans.Student;
+import utilities.SessionFactoryProvider;
+public class Delete {
+public static void main(String[] args)
+{
+SessionFactory
+sessionFactory=SessionFactoryProvider.provideSessionFactory();
+Session session=sessionFactory.openSession();
+Transaction t=session.beginTransaction();
+Student s=session.get(Student.class, 101);
+session.delete(s);
+t.commit();
+sessionFactory.close();
+}
+}

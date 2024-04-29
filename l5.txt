@@ -1,0 +1,435 @@
+(1) HTTP session management:
+CODE:
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Login</title>
+</head>
+<body>
+ <h2>Login</h2>
+ <form action="LoginServlet" method="post">
+ Username: <input type="text" name="username"><br>
+ Password: <input type="password" name="password"><br>
+ <input type="submit" value="Login">
+ </form>
+</body>
+</html>
+LoginServlet.java
+package com.java;
+import java.io.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import java.sql.*;
+public class LoginServlet extends HttpServlet {
+
+private static final long serialVersionUID = 1L;
+private static final String JDBC_URL = "jdbc:mysql://localhost:3306/LoginDB";
+ private static final String DB_USERNAME = "root";
+ private static final String DB_PASSWORD = "Root";
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+ String username = request.getParameter("username");
+ String password = request.getParameter("password");
+ try {
+ Connection connection = DriverManager.getConnection(JDBC_URL,
+DB_USERNAME, DB_PASSWORD);
+ PreparedStatement preparedStatement = connection.prepareStatement("SELECT *
+FROM users WHERE username = ? AND password = ?");
+ preparedStatement.setString(1, username);
+ preparedStatement.setString(2, password);
+ ResultSet resultSet = preparedStatement.executeQuery();
+ if (resultSet.next()) {
+ HttpSession session = request.getSession();
+ session.setAttribute("username", username);
+ response.sendRedirect("Welcome.jsp");
+ } else {
+ response.sendRedirect("error.html");
+ }
+ resultSet.close();
+ preparedStatement.close();
+ connection.close();
+ } catch (SQLException e) {
+ e.printStackTrace();
+ response.sendRedirect("error.html");
+ }
+ }
+}
+Welcome.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Welcome</title>
+</head>
+<body>
+ <h2>Welcome, <%= session.getAttribute("username") %></h2>
+  <p>You are logged in!</p>
+</body>
+</html>
+error.html:
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h3> Something went wrong. Try again later. </h3>
+<a href="index.html">try again</a>
+</body>
+</html>
+
+
+(2) Cookies:
+CODE:
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Login</title>
+</head>
+<body>
+ <h2>Login</h2>
+ <form action="LoginServlet" method="post">
+ Username: <input type="text" name="username"><br>
+ Password: <input type="password" name="password"><br>
+ <input type="submit" value="Login">
+ </form>
+</body>
+</html>
+LoginServlet.java:
+package com.java;
+import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.sql.*;
+public class LoginServlet extends HttpServlet {
+
+private static final long serialVersionUID = 1L;
+private static final String JDBC_URL = "jdbc:mysql://localhost:3306/LoginDB";
+ private static final String DB_USERNAME = "root";
+ private static final String DB_PASSWORD = "Root";
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+       String username = request.getParameter("username");
+ String password = request.getParameter("password");
+ try {
+ Connection connection = DriverManager.getConnection(JDBC_URL,
+DB_USERNAME, DB_PASSWORD);
+ PreparedStatement preparedStatement = connection.prepareStatement("SELECT *
+FROM users WHERE username = ? AND password = ?");
+ preparedStatement.setString(1, username);
+ preparedStatement.setString(2, password);
+ ResultSet resultSet = preparedStatement.executeQuery();
+ if (resultSet.next()) {
+ Cookie cookie = new Cookie("username", username);
+ cookie.setMaxAge(60 * 60 * 24); // Cookie lasts for 24 hours
+ response.addCookie(cookie);
+ response.sendRedirect("welcome.jsp");
+ } else {
+ response.sendRedirect("index.html");
+ }
+ resultSet.close();
+ preparedStatement.close();
+ connection.close();
+ } catch (SQLException e) {
+ e.printStackTrace();
+ response.sendRedirect("error.html");
+ }
+ }
+}
+Welcome.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Welcome</title>
+</head>
+<body>
+ <h2>Welcome, <%= request.getCookies()[0].getValue() %></h2>
+ <p>You are logged in!</p>
+ <a href="logout.jsp">Logout</a>
+</body>
+</html>
+logout.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Logout</title>
+</head>
+<body>
+ <h2>Logout</h2>
+ <p>You have been logged out successfully.</p>
+ <p><a href="index.html">Click here to login again</a></p>
+</body>
+</html>
+
+
+(3) Hidden Object:
+CODE:
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Login</title>
+</head>
+<body>
+ <h2>Login</h2>
+ <form action="LoginServlet" method="post">
+ <input type="hidden" name="action" value="login">
+ Username: <input type="text" name="username"><br>
+ Password: <input type="password" name="password"><br>
+ <input type="submit" value="Login">
+ </form>
+</body>
+</html>
+LoginServlet.java:
+package com.java;
+import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.sql.*;
+public class LoginServlet extends HttpServlet {
+
+private static final long serialVersionUID = 1L;
+private static final String JDBC_URL = "jdbc:mysql://localhost:3306/LoginDB";
+ private static final String DB_USERNAME = "root";
+ private static final String DB_PASSWORD = "Root";
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+ String action = request.getParameter("action");
+
+ if ("login".equals(action)) {
+ String username = request.getParameter("username");
+ String password = request.getParameter("password");
+ try {
+ Connection connection = DriverManager.getConnection(JDBC_URL,
+DB_USERNAME, DB_PASSWORD);
+ PreparedStatement preparedStatement = connection.prepareStatement("SELECT *
+FROM users WHERE username = ? AND password = ?");
+ preparedStatement.setString(1, username);
+ preparedStatement.setString(2, password);
+ ResultSet resultSet = preparedStatement.executeQuery();
+ if (resultSet.next()) {
+ // Create hidden form field for session management
+ String hiddenField = "<input type=\"hidden\" name=\"username\" value=\"" +
+username + "\">";
+request.setAttribute("hiddenField", hiddenField);
+ RequestDispatcher rd = request.getRequestDispatcher("welcome.jsp");
+ rd.forward(request, response);
+ } else {
+ response.sendRedirect("error.html");
+ }
+ resultSet.close();
+ preparedStatement.close();
+ connection.close();
+ } catch (SQLException e) {
+ e.printStackTrace();
+ response.sendRedirect("error.html");
+ }
+ } else {
+ // Handle invalid action
+ response.sendRedirect("index.html");
+ }
+ }
+}
+Welcome.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Welcome</title>
+</head>
+<body>
+ <h2>Welcome, <%= request.getParameter("username") %></h2>
+ <p>You are logged in!</p>
+</body>
+</html>
+error.html:
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>error</title>
+</head>
+<body>
+<h3> Something went wrong. Try again later. </h3>
+<a href="index.html">try again</a>
+</body>
+</html>
+
+
+(4) URL Rewriting:
+CODE:
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Login</title>
+</head>
+<body>
+ <h2>Login</h2>
+ <form action="LoginServlet" method="post">
+ Username: <input type="text" name="username"><br>
+ Password: <input type="password" name="password"><br>
+ <input type="submit" value="Login">
+ </form>
+</body>
+</html>
+LoginServlet.java:
+package com.java;
+import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.sql.*;
+public class LoginServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+private static final String JDBC_URL = "jdbc:mysql://localhost:3306/LoginDB";
+ private static final String DB_USERNAME = "root";
+ private static final String DB_PASSWORD = "Root";
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+       String username = request.getParameter("username");
+ String password = request.getParameter("password");
+ try {
+ Connection connection = DriverManager.getConnection(JDBC_URL,
+DB_USERNAME, DB_PASSWORD);
+ PreparedStatement preparedStatement = connection.prepareStatement("SELECT *
+FROM users WHERE username = ? AND password = ?");
+ preparedStatement.setString(1, username);
+ preparedStatement.setString(2, password);
+ ResultSet resultSet = preparedStatement.executeQuery();
+ if (resultSet.next()) {
+ // Append username to the URL for URL rewriting session management
+ String encodedUsername = response.encodeURL(username);
+ response.sendRedirect("welcome.jsp?username=" + encodedUsername);
+ } else {
+ response.sendRedirect("error.html");
+ }
+ resultSet.close();
+ preparedStatement.close();
+ connection.close();
+ } catch (SQLException e) {
+ e.printStackTrace();
+ response.sendRedirect("error.html");
+ }
+ }
+}
+Welcome.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Welcome</title>
+</head>
+<body>
+ <h2>Welcome, <%= request.getParameter("username") %></h2>
+ <p>You are logged in!</p>
+</body>
+</html>
+error.html:
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<h3> Something went wrong. Try again later. </h3>
+<a href="index.html">try again</a>
+</body>
+</html>
+
+
+(5) RequestDispatcher:
+CODE:
+index.html:
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Login</title>
+</head>
+<body>
+ <h2>Login</h2>
+ <form action="LoginServlet" method="post">
+ Username: <input type="text" name="username"><br>
+ Password: <input type="password" name="password"><br>
+ <input type="submit" value="Login">
+ </form>
+</body>
+</html>
+LoginServlet.java
+package com.java;
+import java.io.*;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.sql.*;
+public class LoginServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+private static final String JDBC_URL = "jdbc:mysql://localhost:3306/LoginDB";
+ private static final String DB_USERNAME = "root";
+ private static final String DB_PASSWORD = "Root";
+ protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+ String username = request.getParameter("username");
+ String password = request.getParameter("password");
+ try {
+ Connection connection = DriverManager.getConnection(JDBC_URL,
+DB_USERNAME, DB_PASSWORD);
+ PreparedStatement preparedStatement = connection.prepareStatement("SELECT *
+FROM users WHERE username = ? AND password = ?");
+ preparedStatement.setString(1, username);
+ preparedStatement.setString(2, password);
+ ResultSet resultSet = preparedStatement.executeQuery();
+ if (resultSet.next()) {
+ // Set session attribute and forward to welcome page using RequestDispatcher
+ HttpSession session = request.getSession();
+ session.setAttribute("username", username);
+ RequestDispatcher rd = request.getRequestDispatcher("welcome.jsp");
+ rd.forward(request, response);
+ } else {
+       response.sendRedirect("error.html");
+ }
+ resultSet.close();
+ preparedStatement.close();
+ connection.close();
+ } catch (SQLException e) {
+ e.printStackTrace();
+ response.sendRedirect("error.html");
+ }
+ }
+}
+Welcome.jsp:
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+ pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Welcome</title>
+</head>
+<body>
+ <h2>Welcome, <%= request.getSession().getAttribute("username") %></h2>
+ <p>You are logged in!</p>
+</body>
+</html>
+error.html:
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Error</title>
+</head>
+<body>
+<h3> Something went wrong. Try again later. </h3>
+<a href="index.html">try again</a>
+</body>
+</html>
+
+

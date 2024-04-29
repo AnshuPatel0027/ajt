@@ -1,0 +1,86 @@
+Employee.java:
+package entities;
+public class Employee {
+private int empId;
+private String empName;
+public Employee(int empId, String empName)
+{
+super();
+this.empId = empId;
+this.empName = empName;
+}
+public int getEmpId() { return empId; }
+public void setEmpId(int empId) { this.empId = empId; }
+public String getEmpName() { return empName; }
+public void setEmpName(String empName)
+{
+this.empName = empName;
+}
+} 
+
+Employee.hbm.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+<class name="entities.Employee" table="employee">
+<id name="empId"></id>
+<property name="empName"></property>
+</class>
+</hibernate-mapping>
+
+
+hibernate.cfg.xml:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+<session-factory>
+<property name="hibernate.hbm2ddl.auto">create</property>
+<property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
+<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/demo</property>
+<property name="hibernate.connection.username">root</property>
+<property name="hibernate.connection.password">root</property>
+<mapping resource="resources/Employee.hbm.xml"></mapping>
+</session-factory>
+</hibernate-configuration>
+
+SessionFactoryProvider.java:
+package utilities;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+public class SessionFactoryProvider {
+public static SessionFactory provideSessionFactory()
+{
+Configuration config = new Configuration();
+config.configure("resources/hibernate.cfg.xml");
+return config.buildSessionFactory();
+}
+}
+Create.java:
+package dao;
+import entities.Employee;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import utilities.SessionFactoryProvider;
+public class Create {
+public static void main(String[] args)
+{
+try {
+SessionFactory sessionFactory
+= SessionFactoryProvider
+.provideSessionFactory();
+Session session = sessionFactory.openSession();
+Transaction t = session.beginTransaction();
+Employee emp = new Employee(101, "John");
+session.save(emp);
+t.commit();
+sessionFactory.close();
+}
+catch (Exception e) {
+System.out.println(e);
+}
+}
+}

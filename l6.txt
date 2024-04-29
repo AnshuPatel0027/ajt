@@ -1,0 +1,334 @@
+CODE :--
+Index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banking System</title>
+<style>
+body{
+background-color:red;
+}
+header{
+text-align: center;
+margin-bottom:2rem;
+padding:1rem;
+background-color:blue;
+border-radius: 0.5rem;
+box-shadow: rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px 0px;
+}
+box-shadow: rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px
+main{
+display:flex;
+justify-content: center;
+0px;
+}
+section{
+margin: 2rem;
+padding: 2rem;
+background-color: #40A2D8cc;
+border-radius: 0.5rem;
+box-shadow: rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, rgba(0, 0, 0, 0.05) 0px 1px 1px
+}
+input{
+border:0;
+border-radius:0.5rem;
+width:100%;
+height:1.5rem;
+}
+h2{
+text-align:center;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>lab 6 - Banking System</h1>
+</header>
+<main>
+<section id="add-account">
+<h2>Add New Account</h2>
+<form id="add-account-form" action="AccountServlet?action=insert" method="POST">
+<label for="accountNumber">Account Number:</label><br>
+<input type="text" id="accountNumber" name="accountNumber" required><br>
+<label for="accountHolder">Account Holder:</label><br>
+<input type="text" id="accountHolder" name="accountHolder" required><br>
+<label for="balance">Balance:</label><br>
+<input type="number" id="balance" name="balance" required><br><br>
+<button type="submit">Add Account</button>
+</form>
+</section>
+<section id="edit-account">
+<h2>Edit Account</h2>
+<form id="edit-account-form" action="AccountServlet?action=update"
+method="POST">
+<label for="edit-accountId">Account Id:</label><br>
+<input type="text" id="edit-accountId" name="accountId" required><br>
+<label for="edit-accountNumber">Account Number:</label><br>
+<input type="text" id="edit-accountNumber" name="accountNumber" required><br>
+<label for="edit-accountHolder">Account Holder:</label><br>
+<input type="text" id="edit-accountHolder" name="accountHolder" required><br>
+<label for="edit-balance">Balance:</label><br>
+<input type="number" id="edit-balance" name="balance" required><br><br>
+<button type="submit">Update Account</button>
+</form>
+</section>
+<section id="delete-account">
+<h2>Delete Account</h2>
+<form id="delete-account-form" action="AccountServlet?action=delete"
+method="POST">
+<label for="delete-accountId">Account Id:</label><br>
+<input type="text" id="delete-accountId" name="accountId" required><br><br>
+<button type="submit">Delete Account</button>
+</form>
+</section>
+<section id="account-list">
+<h2>List Accounts</h2>
+<form id="edit-account-form" action="AccountServlet?action=list" method="POST">
+<button type="submit">View</button><br>
+</form>
+</section>
+</main>
+</body> </html>
+AccountServlet.java
+package com.java;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+public class AccountServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+private Connection conn;
+public void init() {
+String jdbcUrl = "jdbc:mysql://localhost:3306/bank_system";
+String jdbcUsername = "root";
+String jdbcPassword = "Krupal@123 ";
+try {
+Class.forName("com.mysql.cj.jdbc.Driver");
+conn = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+} catch (Exception e) {
+e.printStackTrace();
+}
+}
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+doGet(request, response);
+}
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+String action = request.getParameter("action");
+if (action == null) {
+action = "list";
+}
+switch (action) {
+case "list":
+listAccounts(request, response);
+break;
+case "insert":
+insertAccount(request, response);
+break;
+case "update":
+updateAccount(request, response);
+break;
+case "delete":
+deleteAccount(request, response);
+break;
+default:
+listAccounts(request, response);
+}
+}
+private void listAccounts(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+List<Account> accounts = new ArrayList<>();
+String sql = "SELECT * FROM accounts";
+try {
+Statement statement = conn.createStatement();
+ResultSet resultSet = statement.executeQuery(sql);
+while (resultSet.next()) {
+int accountId = resultSet.getInt("account_id");
+String accountNumber = resultSet.getString("account_number");
+String accountHolder = resultSet.getString("account_holder");
+double balance = resultSet.getDouble("balance");
+Account account = new Account(accountId, accountNumber, accountHolder, balance);
+accounts.add(account);
+}
+StringBuilder tableHtml = new StringBuilder();
+tableHtml.append("<table border='1'>");
+tableHtml.append("<tr><th>Account ID</th><th>Account Number</th><th>Account
+Holder</th><th>Balance</th></tr>");
+for (Account account : accounts) {
+tableHtml.append("<tr>");
+tableHtml.append("<td>").append(account.getAccountId()).append("</td>");
+tableHtml.append("<td>").append(account.getAccountNumber()).append("</td>");
+tableHtml.append("<td>").append(account.getAccountHolder()).append("</td>");
+tableHtml.append("<td>").append(account.getBalance()).append("</td>");
+tableHtml.append("</tr>");
+}
+tableHtml.append("</table>");
+request.setAttribute("accountTable", tableHtml.toString());
+RequestDispatcher dispatcher = request.getRequestDispatcher("accounts.jsp");
+dispatcher.forward(request, response);
+} catch (SQLException e) {
+e.printStackTrace();
+response.sendRedirect("error.jsp");
+}
+}
+private void insertAccount(HttpServletRequest request, HttpServletResponse response) throws
+ServletException, IOException {
+String accountNumber = request.getParameter("accountNumber");
+String accountHolder = request.getParameter("accountHolder");
+double balance = Double.parseDouble(request.getParameter("balance"));
+String sql = "INSERT INTO accounts (account_number, account_holder, balance)
+VALUES (?, ?, ?)";
+try {
+PreparedStatement preparedStatement = conn.prepareStatement(sql);
+preparedStatement.setString(1, accountNumber);
+preparedStatement.setString(2, accountHolder);
+preparedStatement.setDouble(3, balance);
+int rowsInserted = preparedStatement.executeUpdate();
+if (rowsInserted > 0) {
+PrintWriter out = response.getWriter();
+out.println("Account inserted successfully!");
+}
+} catch (SQLException e) {
+       e.printStackTrace();
+response.sendRedirect("error.jsp");
+}
+}
+private void updateAccount(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+int accountId = Integer.parseInt(request.getParameter("accountId"));
+String accountNumber = request.getParameter("accountNumber");
+String accountHolder = request.getParameter("accountHolder");
+double balance = Double.parseDouble(request.getParameter("balance"));
+String sql = "UPDATE accounts SET account_number=?, account_holder=?, balance=?
+WHERE account_id=?";
+try {
+PreparedStatement statement = conn.prepareStatement(sql);
+statement.setString(1, accountNumber);
+statement.setString(2, accountHolder);
+statement.setDouble(3, balance);
+statement.setInt(4, accountId);
+int rowsUpdated = statement.executeUpdate();
+if (rowsUpdated > 0) {
+PrintWriter out = response.getWriter();
+out.println("Account updated successfully!");
+}
+} catch (SQLException e) {
+e.printStackTrace();
+response.sendRedirect("error.jsp");
+}
+}
+private void deleteAccount(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+int accountId = Integer.parseInt(request.getParameter("accountId"));
+String sql = "DELETE FROM accounts WHERE account_id=?";
+try {
+PreparedStatement statement = conn.prepareStatement(sql);
+statement.setInt(1, accountId);
+int rowsDeleted = statement.executeUpdate();
+if (rowsDeleted > 0) {
+PrintWriter out = response.getWriter();
+out.println("Account deleted successfully!");
+}
+} catch (SQLException e) {
+e.printStackTrace();
+response.sendRedirect("error.jsp");
+}
+}
+public void destroy() {
+try {
+if (conn != null && !conn.isClosed()) {
+conn.close();
+}
+} catch (SQLException e) {
+e.printStackTrace();}
+}
+}
+Account.java
+package com.java;
+public class Account {
+private int accountId;
+private String accountNumber;
+private String accountHolder;
+private double balance;
+public Account(int accountId, String accountNumber, String accountHolder, double balance) {
+this.accountId = accountId;
+this.accountNumber = accountNumber;
+this.accountHolder = accountHolder;
+this.balance = balance;
+}
+public int getAccountId() {
+return accountId;
+}
+public void setAccountId(int accountId) {
+this.accountId = accountId;
+}
+public String getAccountNumber() {
+return accountNumber;
+}
+public void setAccountNumber(String accountNumber) {
+this.accountNumber = accountNumber;
+}
+public String getAccountHolder() {
+return accountHolder;
+}
+public void setAccountHolder(String accountHolder) {
+this.accountHolder = accountHolder;
+}
+public double getBalance() {
+return balance;
+}
+public void setBalance(double balance) {
+this.balance = balance;
+}
+}
+accounts.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+<title>Accounts List</title>
+<style type="text/css">
+body{
+background-color: #40A2D8cc;
+}
+</style>
+</head>
+<body>
+<h1>Accounts List</h1>
+<%= request.getAttribute("accountTable") %>
+</body>
+</html>
+web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="https://jakarta.ee/xml/ns/jakartaee"
+xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/webapp_6_0.xsd" id="WebApp_ID" version="6.0">
+<display-name>ajtlab6</display-name>
+<servlet>
+<display-name>AccountServlet</display-name>
+<servlet-name>AccountServlet</servlet-name>
+<servlet-class>com.java.AccountServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>AccountServlet</servlet-name>
+<url-pattern>/AccountServlet</url-pattern>
+</servlet-mapping>
+<servlet>
+<description></description>
+<display-name>Account</display-name>
+<servlet-name>Account</servlet-name>
+<servlet-class>com.java.Account</servlet-class>
+</servlet>
+<servlet-mapping>
+<servlet-name>Account</servlet-name>
+<url-pattern>/Account</url-pattern>
+</servlet-mapping>
+</web-app>
+
