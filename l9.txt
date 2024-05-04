@@ -68,6 +68,8 @@ xsi:noNamespaceSchemaLocation="students.xsd">
 </student>
 </c:forEach>
 </students>
+
+
 Student.dtd
 <!ELEMENT students (student+)>
 <!ELEMENT student (id, name, age, subjects)>
@@ -78,6 +80,8 @@ Student.dtd
 <!ELEMENT subject (name, grade)>
 <!ELEMENT subject_name (#PCDATA)>
 <!ELEMENT grade (#PCDATA)>
+
+
 Student.xsd
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
