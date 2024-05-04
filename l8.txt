@@ -13,6 +13,7 @@ Index.html
 </body>
 </html>
 
+
 Lab8.jsp
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
 %>
@@ -27,6 +28,7 @@ Lab8.jsp
 </body>
 </html>
 
+
 header.jsp
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
 %>
@@ -38,6 +40,7 @@ header.jsp
 <h1>This is the header</h1>
 </body>
 </html>
+
 
 result.jsp
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
@@ -51,6 +54,7 @@ result.jsp
 <p>This is the result page.</p>
 </body>
 </html>
+
 
 web.xml
 <web-app>
