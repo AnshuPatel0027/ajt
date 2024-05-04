@@ -62,11 +62,15 @@ e.printStackTrace();
 
 RMI Application :
 CODE :-
+
+
 Adder.java
 import java.rmi.*;
 public interface Adder extends Remote{
 public int add(int x,int y)throws RemoteException;
 }
+
+
 AdderRemote.java
 import java.rmi.*;
 import java.rmi.server.*;
@@ -76,6 +80,8 @@ super();
 }
 public int add(int x,int y){return x+y;}
 }
+
+
 MyServer.java
 import java.rmi.*;
 import java.rmi.registry.*;
@@ -87,6 +93,8 @@ Naming.rebind("rmi://localhost:5000/sonoo",stub);
 }catch(Exception e){System.out.println(e);}
 }
 }
+
+
 MyClient.java
 import java.rmi.*;
 public class MyClient{
@@ -101,5 +109,7 @@ server.policy
 grant {
  permission java.security.AllPermission;
 };
+
+
 Command for running files with security policy :
 java -Djava.security.policy=server.policy Server
